@@ -11,12 +11,35 @@ library(stringr)
 library(ROAuth)
 library(tidytext)
 library(readr)
+library(stringdist)
 
-data <- read_csv("data.csv")
+data <- read.csv("data.csv")
+stop <- read.csv("stopwords.csv")
 
-# Filter to Brazil only
+# Remove retweets
 
-data <- filter(data, Country == "Brazil")
+data <- data[!grepl("^rt", data$Contents),]
+
+# Additional cleaning that was missed previously
+
+data$Contents <- gsub("ú","u", data$Contents)
+data$Contents <- gsub("ä","a", data$Contents)
+data$Contents <- gsub("ó","o", data$Contents)
+data$Contents <- gsub("ô","o", data$Contents)
+data$Contents <- gsub("à","a", data$Contents)
+
+# Clean the stopwords
+
+stop$stopwords <- gsub("ú","u", stop$stopwords)
+stop$stopwords <- gsub("ä","a", stop$stopwords)
+stop$stopwords <- gsub("ó","o", stop$stopwords)
+stop$stopwords <- gsub("ô","o", stop$stopwords)
+stop$stopwords <- gsub("á","a", stop$stopwords)
+stop$stopwords <- gsub("ã","a", stop$stopwords)
+stop$stopwords <- gsub("é","e", stop$stopwords)
+stop$stopwords <- gsub("í","i", stop$stopwords)
+stop$stopwords <- gsub("ê","e", stop$stopwords)
+stop$stopwords <- gsub("à","a", stop$stopwords)
 
 # Use regular expressions to separate tweets by product
 
@@ -28,7 +51,8 @@ for (i in 1:nrow(data)) {
   } else if (grepl("jd", data$Contents[i], fixed = TRUE) == TRUE|grepl("jack", data$Contents[i], fixed = TRUE) == TRUE|
              grepl("daniel", data$Contents[i], fixed = TRUE) == TRUE) {
     data$cate[i] <- "JackDaniels"
-  } else if (grepl("fireball", data$Contents[i], fixed = TRUE) == TRUE|grepl("firebal", data$Contents[i], fixed = TRUE) == TRUE) {
+  } else if (grepl("fireball", data$Contents[i], fixed = TRUE) == TRUE|grepl("firebal", data$Contents[i], fixed = TRUE) == TRUE|
+             grepl("fire ball", data$Contents[i], fixed = TRUE) == TRUE|grepl("fire bal", data$Contents[i], fixed = TRUE) == TRUE) {
     data$cate[i] <- "fireball"
   } else {
     data$cate[i] <- "unknown"
@@ -56,67 +80,51 @@ jackhoney <- filter(jack, jackhoney == 1)
 
 # Consumer insights -> whiskey and beer, whiskey and coconut water?
 
-other$coco <- ifelse(((grepl("whiskey", other$Contents, fixed = TRUE) == TRUE|grepl("uisque", other$Contents, fixed = TRUE) == TRUE)&
-                         grepl("coco", other$Contents, fixed = TRUE) == TRUE),1,0)
+other$coco <- ifelse((grepl("gelo de coco", other$Contents, fixed = TRUE) == TRUE|grepl("coco", other$Contents, fixed = TRUE) == TRUE),1,0)
 
 gelodecoco <- filter(other, coco == 1)
 
 other$beer <- ifelse(((grepl("whiskey", other$Contents, fixed = TRUE) == TRUE|grepl("uisque", other$Contents, fixed = TRUE) == TRUE|
-                         grepl("shot", other$Contents, fixed = TRUE) == TRUE|grepl("dose", other$Contents, fixed = TRUE) == TRUE)&
+                         grepl("shot", other$Contents, fixed = TRUE) == TRUE|grepl("dose", other$Contents, fixed = TRUE) == TRUE|
+                         grepl("whisky", other$Contents, fixed = TRUE) == TRUE|grepl("whisk", other$Contents, fixed = TRUE) == TRUE)&
                         grepl("beer", other$Contents, fixed = TRUE) == TRUE|grepl("cerveja", other$Contents, fixed = TRUE) == TRUE),1,0)
 
 cerveja <- filter(other, beer == 1)
 
+
+uncategorized <- filter(other, coco == 0 & beer == 0)
+
+# Write important dfs to csv
+write_csv(jackfire, "jackfire.csv")
+write_csv(jackhoney, "jackhoney.csv")
+write_csv(fireball, "fireball.csv")
+write_csv(jager, "jager.csv")
+write_csv(cerveja, "cerveja.csv")
+write_csv(gelodecoco, "gelodecoco.csv")
+
 # Specific insights for Marissa = whiskey and coconut water & shot of whiskey and beer. Can we find any trends? What is the sentiment?
 
 
+# Distance Based Clustering
+
+distancemodels <- stringdistmatrix(data$Contents, data$Contents, method = "cosine", q = 2)
+rownames(distancemodels) <- data$Contents
 
 
 
 
-docs <- Corpus(VectorSource(data$Contents))
+
+# Jack Fire word cloud
+
+docs <- Corpus(VectorSource(jackfire$Contents))
 docs <- tm_map(docs, removeNumbers)
 docs <- tm_map(docs, removePunctuation)
 docs <- tm_map(docs, stripWhitespace)
 docs <- tm_map(docs, content_transformer(tolower))
-docs <- tm_map(docs, removeWords, c('de','a','o','que','e','do','da','em',
-                                    'um','para','Ã©','com','nÃ£o','uma','os','no',
-                                    'se','na','por','mais','as','dos','como',
-                                    'mas','foi','ao','ele','das','tem','Ã','seu',
-                                    'sua','ou','ser','quando','muito','hÃ¡','nos',
-                                    'jÃ¡','estÃ¡','eu','tambÃ©m','sÃ³','pelo','pela',
-                                    'atÃ©','isso','ela','entre','era','depois','sem',
-                                    'mesmo','aos','ter','seus','quem','nas','me',
-                                    'esse','eles','estÃ£o','vocÃª','tinha','foram',
-                                    'essa','num','nem','suas','meu','Ãs','minha',
-                                    'tÃªm','numa','pelos','elas','havia','seja',
-                                    'qual','serÃ¡','nÃ³s','tenho','lhe','deles','essas',
-                                    'esses','pelas','este','fosse','dele','tu','te',
-                                    'vocÃªs','vos','lhes','meus','minhas','teu','tua',
-                                    'teus','tuas','nosso','nossa','nossos','nossas',
-                                    'dela','delas','esta','estes','estas','aquele',
-                                    'aquela','aqueles','aquelas','isto','aquilo',
-                                    'estou','estÃ¡','estamos','estÃ£o','estive','esteve',
-                                    'estivemos','estiveram','estava','estÃ¡vamos',
-                                    'estavam','estivera','estivÃ©ramos','esteja',
-                                    'estejamos','estejam','estivesse','estivÃ©ssemos',
-                                    'estivessem','estiver','estivermos','estiverem',
-                                    'hei','hÃ¡','havemos','hÃ£o','houve','houvemos',
-                                    'houveram','houvera','houvÃ©ramos','haja','hajamos',
-                                    'hajam','houvesse','houvÃ©ssemos','houvessem',
-                                    'houver','houvermos','houverem','houverei',
-                                    'houverÃ¡','houveremos','houverÃ£o','houveria',
-                                    'houverÃamos','houveriam','sou','somos','sÃ£o',
-                                    'era','Ãramos','eram','fui','foi','fomos','foram',
-                                    'fora','fÃ´ramos','seja','sejamos','sejam','fosse',
-                                    'fÃ´ssemos','fossem','for','formos','forem','serei',
-                                    'serÃ¡','seremos','serÃ£o','seria','seramos','seriam',
-                                    'tenho','tem','temos','tÃ©m','tinha','tÃnhamos',
-                                    'tinham','tive','teve','tivemos','tiveram','tivera',
-                                    'tivÃ©ramos','tenha','tenhamos','tenham','tivesse',
-                                    'tirassemos','tivessem','tiver','tivermos','tiverem',
-                                    'terei','terai','teremos','teraio','teria','teramos',
-                                    'teriam'))
+docs <- tm_map(docs, removeWords, stop$stopwords)
+docs <- tm_map(docs, removeWords, c("jack","daniel","daniels","fire","canela","caneleira","fogo","red","jackdaniels",
+                                    "jackdanielsfire","jackfire","jackdanielswhiskey","jackdanielstennessee","nois","whiskey",
+                                    "whisky","uisque","pra"))
 
 dtm <- TermDocumentMatrix(docs)
 m <- as.matrix(dtm)
@@ -124,4 +132,72 @@ v <- sort(rowSums(m),decreasing = TRUE)
 d <- data.frame(word = names(v),freq=v)
 head(d,10)
 
-wordcloud(d$word, d$freq)
+wordcloud(d$word, d$freq, min.freq = 1,
+          max.words=100, random.order=FALSE, rot.per=0.35, 
+          colors=brewer.pal(8, "Dark2"))
+
+# Jack Honey word cloud
+
+docs <- Corpus(VectorSource(jackhoney$Contents))
+docs <- tm_map(docs, removeNumbers)
+docs <- tm_map(docs, removePunctuation)
+docs <- tm_map(docs, stripWhitespace)
+docs <- tm_map(docs, content_transformer(tolower))
+docs <- tm_map(docs, removeWords, stop$stopwords)
+docs <- tm_map(docs, removeWords, c("jack","daniel","daniels","honey","mel", "jackdaniels",
+                                    "jackdanielshoney","jackhoney","jackdanielswhiskey","jackdanielstennessee","nois","whiskey",
+                                    "whisky","uisque","pra"))
+
+dtm <- TermDocumentMatrix(docs)
+m <- as.matrix(dtm)
+v <- sort(rowSums(m),decreasing = TRUE)
+d <- data.frame(word = names(v),freq=v)
+head(d,10)
+
+wordcloud(d$word, d$freq, min.freq = 1,
+          max.words=100, random.order=FALSE, rot.per=0.35, 
+          colors=brewer.pal(8, "Dark2"))
+
+# Fireball word cloud
+
+docs <- Corpus(VectorSource(unique(fireball$Contents)))
+docs <- tm_map(docs, removeNumbers)
+docs <- tm_map(docs, removePunctuation)
+docs <- tm_map(docs, stripWhitespace)
+docs <- tm_map(docs, content_transformer(tolower))
+docs <- tm_map(docs, removeWords, stop$stopwords)
+docs <- tm_map(docs, removeWords, c("fireball","firebal","fire","ball","cinnamon", "canela","nois","whiskey",
+                                    "whisky","uisque","pra"))
+
+dtm <- TermDocumentMatrix(docs)
+m <- as.matrix(dtm)
+v <- sort(rowSums(m),decreasing = TRUE)
+d <- data.frame(word = names(v),freq=v)
+head(d,10)
+
+wordcloud(d$word, d$freq, min.freq = 1,
+          max.words=100, random.order=FALSE, rot.per=0.35, 
+          colors=brewer.pal(8, "Dark2"))
+
+# Jager word cloud
+
+docs <- Corpus(VectorSource(jager$Contents))
+docs <- tm_map(docs, removeNumbers)
+docs <- tm_map(docs, removePunctuation)
+docs <- tm_map(docs, stripWhitespace)
+docs <- tm_map(docs, content_transformer(tolower))
+docs <- tm_map(docs, removeWords, stop$stopwords)
+docs <- tm_map(docs, removeWords, c("jager","yager","jagermeister","yagermeister","jagermister","nois","pra","jagerbomb",
+                                    "bombs"))
+
+dtm <- TermDocumentMatrix(docs)
+m <- as.matrix(dtm)
+v <- sort(rowSums(m),decreasing = TRUE)
+d <- data.frame(word = names(v),freq=v)
+head(d,10)
+
+wordcloud(d$word, d$freq, min.freq = 1,
+          max.words=100, random.order=FALSE, rot.per=0.35, 
+          colors=brewer.pal(8, "Dark2"))
+
+unique(fireball$Contents)
