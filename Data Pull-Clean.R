@@ -1,0 +1,36 @@
+library(tidyverse)
+library(tm)
+
+first <- read.csv("Posts from 2017-01-25.csv")
+second <- read.csv("Posts from 2017-04-21.csv")
+third <- read.csv("Posts from 2017-07-01.csv")
+fourth <- read.csv("Posts from 2017-08-07.csv")
+fifth <- read.csv("Posts from 2017-09-21.csv")
+one <- read.csv("1.csv")
+two <- read.csv("2.csv")
+three <- read.csv("3.csv")
+four <- read.csv("4.csv")
+five <- read.csv("5.csv")
+six <- read.csv("6.csv")
+seven <- read.csv("7.csv")
+eight <- read.csv("8.csv")
+nine <- read.csv("9.csv")
+ten <- read.csv("10.csv")
+
+tweets <- rbind(first, second, third, fourth, fifth, one, two, three, four, five, six, seven, eight, nine, ten)
+
+tweets <- filter(tweets, Country == "Brazil")
+
+tweets$Contents <- gsub("á","a",tweets$Contents)
+tweets$Contents <- gsub("ã","a",tweets$Contents)
+tweets$Contents <- gsub("ç","z",tweets$Contents)
+tweets$Contents <- gsub("Ã","a",tweets$Contents)
+tweets$Contents <- gsub("é","e",tweets$Contents)
+tweets$Contents <- gsub("ó","o",tweets$Contents)
+tweets$Contents <- gsub("í","i",tweets$Contents)
+tweets$Contents <- gsub("ê","e",tweets$Contents)
+
+tweets$Contents <- removePunctuation(tweets$Contents)
+tweets$Contents <- tolower(tweets$Contents)
+
+write_csv(tweets, "data.csv")
