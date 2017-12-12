@@ -1,0 +1,38 @@
+---
+title: "Consumer Reaction to Jack Daniel's Tennessee Fire in the Brazilian Market"
+output: html_document
+---
+
+> Libraries: `tm`,  `plyr`, `stringr`, `tidyverse`, `tidytext`, `readr`, `tidyr`, `stringdist`, `topicmodels`, `stopwords`, `lexiconPT`, `wordcloud`, `RColorBrewer`, `ggplot2`, `ggiraph`, `plotly`, `ggthemes`, `scales`  
+
+
+##### DATA
+
+Twitter and Instagram data was queried from web software Crimson Hexagon. Each post contained information about the date/time, location (Brazil), gender of user, number of followers, number following, Klout score, number of posts, and a "Category" generated from Crimson Hexagon.
+
+##### PREPARATION
+
+Used regular expression to pull out tweets relevant to our brands of interest (Jack Fire, Jack Honey, Fireball, Jager) and to remove irrelevant tweets, such as song lyrics or references to other types of popular culture (i.e. video games, celebrities, TV, etc.).
+
+##### MODELING
+
+* Latent Dirichlet Allocation - Topic Modeling (assumes topics are unrelated)
+
+* Correlated Topic Model - Topic Modeling (assumes topics are related)
+
+* Sentiment Analysis 
+
+##### ADDITONAL CONTENT ANALYSIS
+
+* Word Ratios - Frequency Jack Fire / Frequency Competition
+    + How much more likely is a word to appear in a tweet referencing Jack than a tweet referencing a competitor?
+    
+* n-Gram Analysis 
+    + Are there any word associations that could indicate consumer insights/trends (i.e. consumption method).
+  
+* Photo/Media Analysis
+    + Are there any specific photos that consumers are resonating with the most?
+    + What type of images are most prevalent in the Brazilian market?
+  
+  
+
