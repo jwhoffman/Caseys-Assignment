@@ -3,7 +3,7 @@ title: "Consumer Reaction to Jack Daniel's Tennessee Fire in the Brazilian Marke
 output: html_document
 ---
 
-> Libraries: `tm`,  `plyr`, `stringr`, `tidyverse`, `tidytext`, `readr`, `tidyr`, `stringdist`, `topicmodels`, `stopwords`, `lexiconPT`, `wordcloud`, `RColorBrewer`, `ggplot2`, `ggiraph`, `plotly`, `ggthemes`, `scales`  
+> Libraries: `tm`,  `plyr`, `stringr`, `tidyverse`, `tidytext`, `readr`, `tidyr`, `stringdist`, `topicmodels`, `stopwords`, `lexiconPT`, `wordcloud`, `RColorBrewer`, `ggplot2`, `ggiraph`, `plotly`, `ggthemes`, `scales`, `readxl`  
 
 
 ##### DATA
